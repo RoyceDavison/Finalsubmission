@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^$',views.login_redirect, name ="login_redirect"),
     url(r'^admin/', admin.site.urls),
     url(r'^InfoTrack/', include('InfoTrack.urls', namespace = "InfoTrack")),
-    url(r'^friendship/', include('friendship.urls',namespace="friendship"))
+    url(r'^friendship/', include('friendship.urls'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

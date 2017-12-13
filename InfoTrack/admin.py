@@ -1,5 +1,5 @@
 from django.contrib import admin
-from InfoTrack.models import UserProfile, Post, Comment, Friend
+from InfoTrack.models import UserProfile, Post, Comment
 
 
 admin.site.site_header = "InfoTrack Administration"
@@ -26,5 +26,4 @@ class UserProfileAdmin(admin.ModelAdmin):
     user_info.short_description = 'Description'
 
 admin.site.register(UserProfile,UserProfileAdmin)
-admin.site.register(Friend)
 

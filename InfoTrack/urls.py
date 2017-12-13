@@ -6,8 +6,6 @@ urlpatterns = [
     # or you can make it views.home, name = "home" and make corresponding change in views.py
      #url(r'^$', views.index, name='index'),   
      url(r'^$', views.homepage, name='homepage'), 
-     
-     url(r'^test/$', views.create_friend, name='test'), 
 
      url(r'^clubinfo/$', views.clubinfo, name='clubinfo'), 
      url(r'^courseinfo/$', views.courseinfo, name='courseinfo'), 
@@ -38,9 +36,12 @@ urlpatterns = [
     url(r'^post_list.html/$', views.post_list, name='post_list'),
     url(r'^post/(?P<pk>\d+)/$', views.post_detail, name='post_detail'),
 
-    url(r'^post/(?P<pk>\d+)/edit/$', views.post_edit, name='post_edit'),
     url(r'^add_comment.html/(?P<pk>\d+)$', views.add_comment, name='add_comment'),
-    url(r'^post_search.html/$', views.post_search, name='post_search')
+    url(r'^post_search.html/$', views.post_search, name='post_search'),
+
+    url(r'^view_friends/(?P<username>[\w-]+)$', views.view_friends, name = "view_friends"),
+    url(r'^add_friend/(?P<to_username>[\w-]+)$',views.friendship_add_friend,name="add_friend"),
+    url(r'^friend/requests/$',views.friendship_request_list,name="friendship_request_list"),
 ]   
 
 #python3 -m smtpd -n -c DebuggingServer localhost:1025

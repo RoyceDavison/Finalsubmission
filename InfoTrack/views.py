@@ -15,8 +15,6 @@ def register(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            #profile = form.save(commit = False)
-            #profile.user = request.user
             form.save()
             return redirect(reverse('InfoTrack:homepage'))
     else:
@@ -251,20 +249,6 @@ def add_post(request):
     return render(request, 'posts/add_post.html', {'form': form})
 
 @login_required
-def post_edit(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == "POST":
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.time = timezone.now()
-            post.save()
-            return redirect('posts/post_detail', pk=post.pk)
-    else:
-        form = PostForm(instance=post)
-    return render(request, 'posts/post_edit.html', {'form': form})
-
-@login_required
 def post_search(request):
     if request.method == 'GET':
         keyword = request.GET.get('search_box', None)
@@ -308,21 +292,61 @@ def test(request):
     return render(request,"base_test.html")
 
 ####################################################
-from friendship.models import FriendshipRequest
-from friendship.models import Friend, Follow
+#The following functionalities are left to test
+####################################################
+from friendship.models import Friend, Follow,FriendshipRequest
+from django.conf import settings
+try:
+    from django.contrib.auth import get_user_model
+    user_model = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
+    user_model = User
+
+from django.shortcuts import get_object_or_404
+from friendship.exceptions import AlreadyExistsError
+
+# def friend_list(request, username):
+#     user = User.objects.get(username=username)
+#     friends = Friend.objects.friends(user)
+#     return render(request, 'friends/friends_list.html', {
+#         'friends': friends
+#     }
+#     )
+get_friendship_context_object_name = lambda: getattr(settings, 'FRIENDSHIP_CONTEXT_OBJECT_NAME', 'user')
+get_friendship_context_object_list_name = lambda: getattr(settings, 'FRIENDSHIP_CONTEXT_OBJECT_LIST_NAME', 'users')
 
 
-def create_friend(request,pk=None):
-    friends = Friend.objects.friends(request.user)  
-    return redirect('InfoTrack:friendship')
+def view_friends(request, username, template_name='friendship/friend/user_list.html'):
+    """ View the friends of a user """
+    user = get_object_or_404(user_model, username=username)
+    friends = Friend.objects.friends(user)
+    return render(request, template_name, {
+        get_friendship_context_object_name(): user,
+        'friendship_context_object_name': get_friendship_context_object_name()
+    })
 
-def receive_friend(request,pk):
-    friend_request = FriendshipRequest.objects.get(pk=1)
-    friend_request.accept()
-    # or friend_request.reject()
-    return redirect('InfoTrack:friendship')
 
-def remove_friend(request,pk):
-    Friend.objects.remove_friend(request.user, other_user)
-    return redirect('InfoTrack:friendship')
+def friendship_request_list(request):
+    """ View unread and read friendship requests """
+    # friendship_requests = Friend.objects.requests(request.user)
+    friendship_requests = FriendshipRequest.objects.filter(rejected__isnull=True)
+    #print(friendship_requests)
+    return render(request, 'friends/requests_list.html', {'requests': friendship_requests})
 
+@login_required
+def friendship_add_friend(request, to_username):
+    """ Create a FriendshipRequest """
+    ctx = {'to_username': to_username}
+
+    if request.method == 'POST':
+        to_user = user_model.objects.get(username=to_username)
+        from_user = request.user
+        try:
+            Friend.objects.add_friend(from_user, to_user)
+        except AlreadyExistsError as e:
+            ctx['errors'] = ["%s" % e]
+        else:
+            return redirect('friendship_request_list')
+
+    return render(request, 'friends/add.html', ctx)

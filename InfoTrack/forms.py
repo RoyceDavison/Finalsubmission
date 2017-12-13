@@ -65,7 +65,8 @@ class ProfileForm(forms.Form):
 
         if commit:
             user.save()
-            user_profile = UserProfile()
+            print(user.id)
+            user_profile = UserProfile(user=user)
             user_profile.studentID = self.cleaned_data["studentID"]
             user_profile.location = self.cleaned_data["location"]
             user_profile.birth_date = self.cleaned_data["birth_date"]
@@ -74,7 +75,9 @@ class ProfileForm(forms.Form):
             user_profile.major = self.cleaned_data["major"]
             user_profile.website = self.cleaned_data["website"]
             user_profile.description = self.cleaned_data["description"]
-            user_profile.user = user
+            print(user_profile.userid)
+            print(user_profile.user_id)
+            # print(UserProfile.objects.get(userid=user_profile.userid))
             user_profile.save()
 
 
